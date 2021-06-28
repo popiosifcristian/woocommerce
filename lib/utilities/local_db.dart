@@ -31,26 +31,68 @@
 
  */
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class LocalDatabaseService {
+class LocalDatabaseServiceProvider {
+  static LocalDatabaseService get db =>
+      kIsWeb ? LocalDatabaseServiceWeb() : LocalDatabaseServiceNative();
+}
 
+abstract class LocalDatabaseService {
+  final _tokenKey = 'token';
+
+  Future<void> updateSecurityToken(String? token);
+
+  Future<void> deleteSecurityToken();
+
+  Future<String> getSecurityToken();
+}
+
+class LocalDatabaseServiceNative extends LocalDatabaseService {
   final securityToken = new FlutterSecureStorage();
 
-  updateSecurityToken(String? token) async{
-    await securityToken.write(key: 'token', value: token);
+  @override
+  Future<void> deleteSecurityToken() async {
+    await securityToken.delete(key: this._tokenKey);
   }
 
-  deleteSecurityToken() async{
-    await securityToken.delete(key: 'token');
-  }
-
-  Future<String> getSecurityToken () async{
-    String? token = await securityToken.read(key: 'token');
-    if(token == null){
+  @override
+  Future<String> getSecurityToken() async {
+    String? token = await securityToken.read(key: this._tokenKey);
+    if (token == null) {
       token = '0';
     }
     return token;
   }
 
+  @override
+  Future<void> updateSecurityToken(String? token) async {
+    await securityToken.write(key: this._tokenKey, value: token);
+  }
+}
+
+class LocalDatabaseServiceWeb extends LocalDatabaseService {
+  @override
+  Future<void> deleteSecurityToken() async {
+    var prefs = await SharedPreferences.getInstance();
+    await prefs.remove(this._tokenKey);
+  }
+
+  @override
+  Future<String> getSecurityToken() async {
+    var prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString(this._tokenKey);
+    if (token == null) {
+      token = '0';
+    }
+    return token;
+  }
+
+  @override
+  Future<void> updateSecurityToken(String? token) async {
+    var prefs = await SharedPreferences.getInstance();
+    await prefs.setString(this._tokenKey, token!);
+  }
 }

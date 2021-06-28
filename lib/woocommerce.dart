@@ -64,6 +64,7 @@ import 'models/products.dart';
 import 'models/shipping_method.dart';
 import 'models/shipping_zone.dart';
 import 'models/shipping_zone_location.dart';
+
 //import 'models/shipping_zone_method.dart';
 import 'models/tax_classes.dart';
 import 'models/tax_rate.dart';
@@ -153,15 +154,18 @@ class WooCommerce {
   }
 
   String? _authToken;
+
   String? get authToken => _authToken;
 
   Uri? queryUri;
+
   String get apiResourceUrl => queryUri.toString();
 
   // Header to be sent for JWT authourization
   Map<String, String> _urlHeader = {'Authorization': ''};
+
   String get urlHeader => _urlHeader['Authorization'] = 'Bearer ' + authToken!;
-  LocalDatabaseService _localDbService = LocalDatabaseService();
+  LocalDatabaseService _localDbService = LocalDatabaseServiceProvider.db;
 
   /// Authenticates the user using WordPress JWT authentication and returns the access [_token] string.
   ///
@@ -984,19 +988,19 @@ class WooCommerce {
   }
 
   /**
-  /// Accepts an int [id] of a product or product variation, int quantity, and an array of chosen variation attribute objects
-  /// Related endpoint : wc/store/cart
-  Future<WooCartItem>addToCart({@required int itemId, @required int quantity, List<WooProductVariation> variations}) async{
-    Map<String, dynamic> data = {
+      /// Accepts an int [id] of a product or product variation, int quantity, and an array of chosen variation attribute objects
+      /// Related endpoint : wc/store/cart
+      Future<WooCartItem>addToCart({@required int itemId, @required int quantity, List<WooProductVariation> variations}) async{
+      Map<String, dynamic> data = {
       'id': itemId,
       'quantity' : quantity,
-    };
-    if(variations!=null) data['variations'] = variations;
-    _setApiResourceUrl(path: 'cart/items', isShop: true);
-    final response = await post(queryUri.toString(), data,);
-    return WooCartItem.fromJson(response);
-  }
-  */
+      };
+      if(variations!=null) data['variations'] = variations;
+      _setApiResourceUrl(path: 'cart/items', isShop: true);
+      final response = await post(queryUri.toString(), data,);
+      return WooCartItem.fromJson(response);
+      }
+   */
 
   /// Accepts an int [id] of a product or product variation, int quantity, and an array of chosen variation attribute objects
   /// Related endpoint : wc/store/cart
